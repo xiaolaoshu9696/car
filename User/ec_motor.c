@@ -3,8 +3,16 @@
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_tim.h"
 #include "misc.h"
-
+#include "ec_delay.h"
 #include "ec_motor.h"
+#include "math.h"
+
+
+int absolute(int a)
+{
+	if (a<0)  return -a;
+	else return a;
+}
 
 /*功能描述：把需要用到的引脚全部初始化
  *参数描述：无 
@@ -112,7 +120,7 @@ void T_Motor_Rotate(bool direction, unsigned delay)
     Motor_SetCCW(3, direction);
 
     //每个脉冲转 1.8 度（电机参数），360 度为 200 个脉冲
-    for (i = 0; i < 200; i++)
+    for (i = 0; i < 3200; i++)
     {
         T_Motor_Plus(1, true);
         T_Motor_Plus(2, true);
@@ -313,7 +321,7 @@ TIM_TypeDef *GetTIM_Index( uint8_t idx )
  * Charlie @2019/02/07
  *  新建
  */
-void Motor_Config(uint8_t idx, uint16_t steps, bool start)
+void Motor_Config(uint8_t idx, uint16_t steps, bool start )
 {
     RCC_ClocksTypeDef RCC_ClocksTypeStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -387,9 +395,213 @@ void Motor_Config(uint8_t idx, uint16_t steps, bool start)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    if( start )
-        TIM_Cmd( tim, ENABLE);
+   if( start )
+      TIM_Cmd( tim, ENABLE);
 }
+
+//分别产生控制三个轮子的pwm波，
+void Motor_Config1( uint16_t Va, uint16_t Vb,uint16_t Vc )
+{
+    RCC_ClocksTypeDef RCC_ClocksTypeStructure1;
+    GPIO_InitTypeDef GPIO_InitStructure1;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure1;
+    TIM_OCInitTypeDef TIM_OCInitStructure1;
+    TIM_BDTRInitTypeDef TIM_BDTRInitStructure1;
+	
+	  RCC_ClocksTypeDef RCC_ClocksTypeStructure2;
+    GPIO_InitTypeDef GPIO_InitStructure2;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure2;
+    TIM_OCInitTypeDef TIM_OCInitStructure2;
+    TIM_BDTRInitTypeDef TIM_BDTRInitStructure2;
+	
+	  RCC_ClocksTypeDef RCC_ClocksTypeStructure3;
+    GPIO_InitTypeDef GPIO_InitStructure3;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure3;
+    TIM_OCInitTypeDef TIM_OCInitStructure3;
+    TIM_BDTRInitTypeDef TIM_BDTRInitStructure3;
+
+   TIM_TypeDef* tim1 = GetTIM_Index( 1 );
+	 TIM_TypeDef* tim2 = GetTIM_Index( 2 );
+	 TIM_TypeDef* tim3 = GetTIM_Index( 3 );
+   // if( tim == 0 )
+   
+
+    //开启定时器时钟
+    //if (idx == 1)
+        //1 号电机采用定时器 1 控制，输出端口是 A8，挂载在 APB2 总线上
+   RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+    //else if (idx == 2)
+        //2 号电机采用定时器 2 控制，输出端口是 A0,挂载在 APB1 总线上
+   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    //else if (idx == 3)
+        //3 号电机采用定时器 3 控制，输出端口是 A6，挂载在 APB1 总线上
+   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+
+    //获取时钟频率
+    RCC_GetClocksFreq(&RCC_ClocksTypeStructure1);
+    //分频和定时周期配置
+    TIM_TimeBaseStructure1.TIM_Prescaler = 500 - 1;
+    TIM_TimeBaseStructure1.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure1.TIM_Period = RCC_ClocksTypeStructure1.SYSCLK_Frequency / (500 * Va) - 1;
+    TIM_TimeBaseStructure1.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure1.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(tim1, &TIM_TimeBaseStructure1);
+		
+		RCC_GetClocksFreq(&RCC_ClocksTypeStructure2);
+    //分频和定时周期配置
+    TIM_TimeBaseStructure2.TIM_Prescaler = 500 - 1;
+    TIM_TimeBaseStructure2.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure2.TIM_Period = RCC_ClocksTypeStructure2.SYSCLK_Frequency / (500 * Vb) - 1;
+    TIM_TimeBaseStructure2.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure2.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(tim2, &TIM_TimeBaseStructure2);
+		
+		 RCC_GetClocksFreq(&RCC_ClocksTypeStructure3);
+    //分频和定时周期配置
+    TIM_TimeBaseStructure3.TIM_Prescaler = 500 - 1;
+    TIM_TimeBaseStructure3.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure3.TIM_Period = RCC_ClocksTypeStructure3.SYSCLK_Frequency / (500 * Vc) - 1;
+    TIM_TimeBaseStructure3.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure3.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(tim3, &TIM_TimeBaseStructure3);
+		
+
+    //配置为PWM 模式1
+    TIM_OCInitStructure1.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure1.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure1.TIM_OutputNState = TIM_OutputState_Disable;
+    TIM_OCInitStructure1.TIM_Pulse = (TIM_TimeBaseStructure1.TIM_Period >> 1) - 1;
+    TIM_OCInitStructure1.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OCInitStructure1.TIM_OCNPolarity = TIM_OCNPolarity_High;
+    TIM_OCInitStructure1.TIM_OCIdleState = TIM_OCIdleState_Set;
+    TIM_OCInitStructure1.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
+    TIM_OC1Init(tim1, &TIM_OCInitStructure1);
+		
+		TIM_OCInitStructure2.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure2.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure2.TIM_OutputNState = TIM_OutputState_Disable;
+    TIM_OCInitStructure2.TIM_Pulse = (TIM_TimeBaseStructure2.TIM_Period >> 1) - 1;
+    TIM_OCInitStructure2.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OCInitStructure2.TIM_OCNPolarity = TIM_OCNPolarity_High;
+    TIM_OCInitStructure2.TIM_OCIdleState = TIM_OCIdleState_Set;
+    TIM_OCInitStructure2.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
+    TIM_OC1Init(tim2, &TIM_OCInitStructure2);
+		
+		
+		TIM_OCInitStructure3.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure3.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure3.TIM_OutputNState = TIM_OutputState_Disable;
+    TIM_OCInitStructure3.TIM_Pulse = (TIM_TimeBaseStructure3.TIM_Period >> 1) - 1;
+    TIM_OCInitStructure3.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OCInitStructure3.TIM_OCNPolarity = TIM_OCNPolarity_High;
+    TIM_OCInitStructure3.TIM_OCIdleState = TIM_OCIdleState_Set;
+    TIM_OCInitStructure3.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
+    TIM_OC1Init(tim3, &TIM_OCInitStructure3);
+		
+
+    //禁止 ARR 寄存器预装载 ( 这样改变 ARR 寄存器值可以立即生效 )
+    TIM_OC1PreloadConfig(tim1, TIM_OCPreload_Disable);
+		TIM_OC1PreloadConfig(tim2, TIM_OCPreload_Disable);
+		TIM_OC1PreloadConfig(tim2, TIM_OCPreload_Disable);
+
+    //自动输出使能，断路、死区时间和锁定配置
+    TIM_BDTRInitStructure1.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
+    TIM_BDTRInitStructure1.TIM_Break = TIM_Break_Disable;
+    TIM_BDTRInitStructure1.TIM_BreakPolarity = TIM_BreakPolarity_Low;
+    TIM_BDTRInitStructure1.TIM_DeadTime = 0;
+    TIM_BDTRInitStructure1.TIM_LOCKLevel = TIM_LOCKLevel_1;
+    TIM_BDTRInitStructure1.TIM_OSSRState = TIM_OSSRState_Disable;
+    TIM_BDTRInitStructure1.TIM_OSSIState = TIM_OSSIState_Disable;
+    TIM_BDTRConfig(tim1, &TIM_BDTRInitStructure1);
+		
+		
+		TIM_BDTRInitStructure2.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
+    TIM_BDTRInitStructure2.TIM_Break = TIM_Break_Disable;
+    TIM_BDTRInitStructure2.TIM_BreakPolarity = TIM_BreakPolarity_Low;
+    TIM_BDTRInitStructure2.TIM_DeadTime = 0;
+    TIM_BDTRInitStructure2.TIM_LOCKLevel = TIM_LOCKLevel_1;
+    TIM_BDTRInitStructure2.TIM_OSSRState = TIM_OSSRState_Disable;
+    TIM_BDTRInitStructure2.TIM_OSSIState = TIM_OSSIState_Disable;
+    TIM_BDTRConfig(tim2, &TIM_BDTRInitStructure2);
+		
+		
+		TIM_BDTRInitStructure3.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
+    TIM_BDTRInitStructure3.TIM_Break = TIM_Break_Disable;
+    TIM_BDTRInitStructure3.TIM_BreakPolarity = TIM_BreakPolarity_Low;
+    TIM_BDTRInitStructure3.TIM_DeadTime = 0;
+    TIM_BDTRInitStructure3.TIM_LOCKLevel = TIM_LOCKLevel_1;
+    TIM_BDTRInitStructure3.TIM_OSSRState = TIM_OSSRState_Disable;
+    TIM_BDTRInitStructure3.TIM_OSSIState = TIM_OSSIState_Disable;
+    TIM_BDTRConfig(tim3, &TIM_BDTRInitStructure3);
+		
+
+    //主动输出使能
+    TIM_CtrlPWMOutputs(tim1, ENABLE);
+		TIM_CtrlPWMOutputs(tim2, ENABLE);
+		TIM_CtrlPWMOutputs(tim3, ENABLE);
+
+    //开启端口时钟 ( 3 个定时器采用的端口都是 A )
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	
+    //配置输出端口为复用 - 推挽输出
+    //if (idx == 1)
+        GPIO_InitStructure1.GPIO_Pin = GPIO_Pin_8;
+    //else if (idx == 2)
+        GPIO_InitStructure2.GPIO_Pin = GPIO_Pin_0;
+   // else if (idx == 3)
+        GPIO_InitStructure3.GPIO_Pin = GPIO_Pin_6;
+
+    GPIO_InitStructure1.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure1.GPIO_Speed = GPIO_Speed_10MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure1);
+		
+		GPIO_InitStructure2.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure2.GPIO_Speed = GPIO_Speed_10MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure2);
+		
+		GPIO_InitStructure3.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure3.GPIO_Speed = GPIO_Speed_10MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure3);
+		
+	 if( absolute(Va)>0 )
+      TIM_Cmd( tim1, ENABLE);
+	 if( absolute(Vb)>0 )
+     TIM_Cmd( tim2, ENABLE);
+	 if( absolute(Vc)>0 )
+      TIM_Cmd( tim3, ENABLE);
+	 
+	  Delay_ms(1000);
+	 
+	  TIM_Cmd(tim1, DISABLE);
+		TIM_Cmd(tim2, DISABLE);
+		TIM_Cmd(tim3, DISABLE);
+
+}
+
+
+//暂时没用
+void Motor_Config123(uint16_t Va,uint16_t Vb,uint16_t Vc)
+{  
+	
+	TIM_TypeDef* tim1 = GetTIM_Index(1);
+	TIM_TypeDef* tim2 = GetTIM_Index(2);
+	TIM_TypeDef* tim3 = GetTIM_Index(3);
+	
+	if (Va==0) Motor_Config1(1, absolute(Va), false); else Motor_Config1(1, absolute(Va), true);
+	if (Vb==0) Motor_Config1(2, absolute(Vb), false); else Motor_Config1(2, absolute(Vb), true);
+	if (Vc==0) Motor_Config1(3, absolute(Vc), false); else Motor_Config1(3, absolute(Vc), true);
+   
+  TIM_Cmd(tim1, ENABLE);
+	TIM_Cmd(tim2, ENABLE);
+	TIM_Cmd(tim3, ENABLE);
+	
+	Delay_ms(1000);
+	TIM_CtrlPWMOutputs(tim1, DISABLE);
+	TIM_CtrlPWMOutputs(tim2, DISABLE);
+	TIM_CtrlPWMOutputs(tim3, DISABLE);	  
+}
+
+
 
 /*功能描述：启动电机
  *参数描述：

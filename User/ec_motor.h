@@ -15,6 +15,12 @@ void T_Motor_Plus(unsigned idx, bool level);
 void Motor_Initialize(void);
 void Motor_EnableDriver(bool bEnable);
 void Motor_Config(uint8_t idx, uint16_t steps, bool start);
+void Motor_Config1( uint16_t Va, uint16_t Vb,uint16_t Vc );
+void Motor_Config123(uint16_t Va,uint16_t Vb,uint16_t Vc);
+
+
+int absolute(int a);
+
 void Motor_Start(uint8_t idx);
 void Motor_Stop(uint8_t idx);
 void Motor_Speed(uint8_t idx, uint16_t steps);
