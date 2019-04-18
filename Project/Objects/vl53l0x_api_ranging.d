@@ -16,9 +16,20 @@
 .\objects\vl53l0x_api_ranging.o: ..\vl51\platform\inc\vl53l0x_platform.h
 .\objects\vl53l0x_api_ranging.o: ..\vl51\platform\inc\vl53l0x_i2c.h
 .\objects\vl53l0x_api_ranging.o: ..\User\sys.h
-.\objects\vl53l0x_api_ranging.o: ..\vl51\platform\inc\vl53l0x_platform_log.h
+.\objects\vl53l0x_api_ranging.o: ..\User\delay.h
+.\objects\vl53l0x_api_ranging.o: ..\User\sys.h
+.\objects\vl53l0x_api_ranging.o: ..\User\usart.h
 .\objects\vl53l0x_api_ranging.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\vl53l0x_api_ranging.o: ..\User\ioi2c.h
+.\objects\vl53l0x_api_ranging.o: ..\User\mpu6050.h
+.\objects\vl53l0x_api_ranging.o: ..\User\inv_mpu.h
+.\objects\vl53l0x_api_ranging.o: ..\User\inv_mpu_dmp_motion_driver.h
+.\objects\vl53l0x_api_ranging.o: ..\User\dmpKey.h
+.\objects\vl53l0x_api_ranging.o: ..\User\dmpmap.h
 .\objects\vl53l0x_api_ranging.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\vl53l0x_api_ranging.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\vl53l0x_api_ranging.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
+.\objects\vl53l0x_api_ranging.o: ..\vl51\platform\inc\vl53l0x_platform_log.h
 .\objects\vl53l0x_api_ranging.o: ..\User\../vl51/demo/vl53l0x.h
 .\objects\vl53l0x_api_ranging.o: ..\vl51\core\inc\vl53l0x_api.h
 .\objects\vl53l0x_api_ranging.o: ..\User\../vl51/demo/vl53l0x_gen.h
@@ -34,4 +45,3 @@
 .\objects\vl53l0x_api_ranging.o: C:\Keil_v5\ARM\Pack\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\stm32f10x_tim.h
 .\objects\vl53l0x_api_ranging.o: C:\Keil_v5\ARM\Pack\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\inc\misc.h
 .\objects\vl53l0x_api_ranging.o: ..\vl51\core\inc\vl53l0x_api_core.h
-.\objects\vl53l0x_api_ranging.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

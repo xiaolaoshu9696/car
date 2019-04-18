@@ -1,19 +1,19 @@
 #include "ioi2c.h"
 #include "sys.h"
 #include "ec_delay.h"
-
+  /**************************************************************************
+作者：平衡小车之家
+我的淘宝小店：http://shop114407458.taobao.com/
+**************************************************************************/
 /**************************实现函数********************************************
 *函数原型:		void IIC_Init(void)
 *功　　能:		初始化I2C对应的接口引脚。
 *******************************************************************************/
 void IIC_Init(void)
 {			
-  GPIO_InitTypeDef GPIO_InitStructure;
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能PB端口时钟
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10|GPIO_Pin_11;	//端口配置
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;      //推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //50M
-  GPIO_Init(GPIOB, &GPIO_InitStructure);					      //根据设定参数初始化GPIOB 
+	RCC->APB2ENR|=1<<3;//先使能外设IO PORTB时钟 							 
+	GPIOB->CRH&=0XFFFF00FF;//PB10/11 推挽输出 
+	GPIOB->CRH|=0X00003300;	   
 }
 
 /**************************实现函数********************************************

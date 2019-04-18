@@ -8,3 +8,16 @@
 .\objects\sys.o: C:\Keil_v5\ARM\Pack\Keil\STM32F1xx_DFP\2.3.0\Device\Include\system_stm32f10x.h
 .\objects\sys.o: C:\Keil_v5\ARM\Pack\Keil\STM32F1xx_DFP\2.3.0\Device\StdPeriph_Driver\templates\stm32f10x_conf.h
 .\objects\sys.o: ..\User\RTE_Components.h
+.\objects\sys.o: ..\User\delay.h
+.\objects\sys.o: ..\User\sys.h
+.\objects\sys.o: ..\User\usart.h
+.\objects\sys.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\sys.o: ..\User\ioi2c.h
+.\objects\sys.o: ..\User\mpu6050.h
+.\objects\sys.o: ..\User\inv_mpu.h
+.\objects\sys.o: ..\User\inv_mpu_dmp_motion_driver.h
+.\objects\sys.o: ..\User\dmpKey.h
+.\objects\sys.o: ..\User\dmpmap.h
+.\objects\sys.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\sys.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\sys.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

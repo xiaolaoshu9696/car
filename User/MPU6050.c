@@ -1,10 +1,6 @@
 #include "MPU6050.h"
 #include "IOI2C.h"
-#include "ec_usart.h"
-#include "inv_mpu.h"
-#include "inv_mpu_dmp_motion_driver.h"
-#include "math.h"
-
+#include "usart.h"
 #define PRINT_ACCEL     (0x01)
 #define PRINT_GYRO      (0x02)
 #define PRINT_QUAT      (0x04)
@@ -18,7 +14,6 @@
 #define q30  1073741824.0f
 short gyro[3], accel[3], sensors;
 
-float Pitch,Roll,Yaw;
 float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
 static signed char gyro_orientation[9] = {-1, 0, 0,
                                            0,-1, 0,

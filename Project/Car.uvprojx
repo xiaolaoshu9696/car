@@ -444,11 +444,6 @@
               <FilePath>..\User\ec_key.c</FilePath>
             </File>
             <File>
-              <FileName>ec_oled.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\ec_oled.c</FilePath>
-            </File>
-            <File>
               <FileName>ec_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\ec_usart.c</FilePath>
@@ -477,16 +472,6 @@
               <FileName>sys.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\sys.c</FilePath>
-            </File>
-            <File>
-              <FileName>ec_mpu6050.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\ec_mpu6050.c</FilePath>
-            </File>
-            <File>
-              <FileName>IOI2C.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\IOI2C.c</FilePath>
             </File>
             <File>
               <FileName>stmflash.c</FileName>
@@ -556,12 +541,27 @@
             <File>
               <FileName>inv_mpu.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\dmp_library\inv_mpu.c</FilePath>
+              <FilePath>..\User\inv_mpu.c</FilePath>
             </File>
             <File>
               <FileName>inv_mpu_dmp_motion_driver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\dmp_library\inv_mpu_dmp_motion_driver.c</FilePath>
+              <FilePath>..\User\inv_mpu_dmp_motion_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>IOI2C.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\IOI2C.c</FilePath>
+            </File>
+            <File>
+              <FileName>MPU6050.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\MPU6050.c</FilePath>
+            </File>
+            <File>
+              <FileName>exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\exti.c</FilePath>
             </File>
           </Files>
         </Group>

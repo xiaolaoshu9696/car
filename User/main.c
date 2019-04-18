@@ -6,7 +6,6 @@
 #include "ec_motor.h"
 #include "ec_timer.h"
 #include "ec_key.h"
-#include "ec_mpu6050.h"
 #include "ec_usart.h"
 #include "ec_delay.h"
 #include "inv_mpu.h"
@@ -18,6 +17,9 @@
 #include "stmflash.h"
 #include "stack.h"
 #include "control.h"
+#include "sys.h"
+#include "exti.h"
+
 
 
 ////计算轮子速度所用到的常量
@@ -364,95 +366,113 @@ extern VL53L0X_Dev_t vl53l0x_dev,vl53l0x_dev2,vl53l0x_dev3;//设备I2C数据参�
 
 int main(void)
 {
-	u8 mode=0;
-	//u8 motor_mode = 0; //电机初始停止
-    u8 datatemp[SIZE];
-	int d1,d2,d3;
-	int t=0;
-	
-	Stack* directionVec = CreateStack();
-  Stack* changedirectionVec=CreateStack();
-	Stack* speed=CreateStack();
-	Stack* distanceVec=CreateStack();
-	
-	Uart1_Initialize(9600);  //串口1
-	Delay_Initialize();
-	
-	Led_Initialize();
-	printf("1");
-	//IIC_Init();
-	printf("2");
-	//MPU6050_Initialize();
-	printf("4");
-	Motor_Initialize();
- 	printf("3");
+	Delay_Initialize();               //=====延时初始化
+	Uart1_Initialize(9600);
+	IIC_Init();                     //=====IIC初始化
+    MPU6050_initialize();           //=====MPU6050初始化	
+    DMP_Init();                     //=====初始化DMP     
+	printf("1\r\n");
+	Delay_ms(1000);                 //=====延时等待初始化稳定
+//    EXTI_init();                   //=====MPU6050 5ms定时中断初始化
+	printf("2\r\n");
+	while(1)
+	{
+		printf("3");
+		Read_DMP();
+		printf("Pitch: %f, Roll: %f, Yaw: %f \r\n",Pitch,Roll,Yaw );
+		Delay_ms(50);
+	}
 	
 	
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//分组2
-	
-	Delay_ms(200);
-	
-	
-	if(vl53l0x_init(&vl53l0x_dev))     //vl53l0x初始化
-	 {
-		printf("VL53L0X_Init Error!!!\r\n");
-		Delay_ms(200);
-	 }
-	 else
-		 printf("VL53L0X_Init OK\r\n");
-	
-	if(vl53l0x_set_mode(&vl53l0x_dev,mode))   //配置测量模式
-		{
-			printf("Mode Set Error!!!\r\n");
-		}
-	else
-		printf("Mode Set OK!!!\r\n");
-	
-		One_measurement(mode);
-	
-	Delay_ms(1000);
-	Delay_ms(1000);
+//	u8 mode=0;
+//	//u8 motor_mode = 0; //电机初始停止
+//    u8 datatemp[SIZE];
+//	int d1,d2,d3;
+//	int t=0;
+//	
+//	Stack* directionVec = CreateStack();
+//  Stack* changedirectionVec=CreateStack();
+//	Stack* speed=CreateStack();
+//	Stack* distanceVec=CreateStack();
+//	
+//	Uart1_Initialize(9600);  //串口1
+//	Delay_Initialize();
+//	
+//	Led_Initialize();
+//	printf("1");
+//	//IIC_Init();
+//	printf("2");
+//	//MPU6050_Initialize();
+//	printf("4");
+//	Motor_Initialize();
+// 	printf("3");
+//	
+//	
+//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//分组2
+//	
+//	Delay_ms(200);
+//	
+//	
+//	if(vl53l0x_init(&vl53l0x_dev))     //vl53l0x初始化
+//	 {
+//		printf("VL53L0X_Init Error!!!\r\n");
+//		Delay_ms(200);
+//	 }
+//	 else
+//		 printf("VL53L0X_Init OK\r\n");
+//	
+//	if(vl53l0x_set_mode(&vl53l0x_dev,mode))   //配置测量模式
+//		{
+//			printf("Mode Set Error!!!\r\n");
+//		}
+//	else
+//		printf("Mode Set OK!!!\r\n");
+//	
+//		One_measurement(mode);
+//	
+//	Delay_ms(1000);
+//	Delay_ms(1000);
 
 
-	
+//	
 
-	if(vl53l0x_init_2(&vl53l0x_dev2))     //vl53l0x初始化
-	 {
-		printf("VL53L0X_Init Error!!!\r\n");
-		Delay_ms(200);
-	 }
-	 else
-		 printf("VL53L0X_Init OK\r\n");
-	
-	if(vl53l0x_set_mode(&vl53l0x_dev2,mode))   //配置测量模式
-		{
-			printf("Mode Set Error!!!\r\n");
-		}
-	else
-		printf("Mode Set OK!!!\r\n");
-	
-		One_measurement2(mode);
-	
-	Delay_ms(1000);	
-	if(vl53l0x_init_3(&vl53l0x_dev3))     //vl53l0x初始化
-	 {
-		printf("VL53L0X_Init Error!!!\r\n");
-		Delay_ms(200);
-	 }
-	 else
-		 printf("VL53L0X_Init OK\r\n");
-	
-	if(vl53l0x_set_mode(&vl53l0x_dev3,mode))   //配置测量模式
-		{
-			printf("Mode Set Error!!!\r\n");
-		}
-	else
-		printf("Mode Set OK!!!\r\n");
-	
-		One_measurement3(mode);
-	vl53l0x_info();
-	vl53l0x_info2();
-	vl53l0x_info3();
+//	if(vl53l0x_init_2(&vl53l0x_dev2))     //vl53l0x初始化
+//	 {
+//		printf("VL53L0X_Init Error!!!\r\n");
+//		Delay_ms(200);
+//	 }
+//	 else
+//		 printf("VL53L0X_Init OK\r\n");
+//	
+//	if(vl53l0x_set_mode(&vl53l0x_dev2,mode))   //配置测量模式
+//		{
+//			printf("Mode Set Error!!!\r\n");
+//		}
+//	else
+//		printf("Mode Set OK!!!\r\n");
+//	
+//		One_measurement2(mode);
+//	
+//	Delay_ms(1000);	
+//	if(vl53l0x_init_3(&vl53l0x_dev3))     //vl53l0x初始化
+//	 {
+//		printf("VL53L0X_Init Error!!!\r\n");
+//		Delay_ms(200);
+//	 }
+//	 else
+//		 printf("VL53L0X_Init OK\r\n");
+//	
+//	if(vl53l0x_set_mode(&vl53l0x_dev3,mode))   //配置测量模式
+//		{
+//			printf("Mode Set Error!!!\r\n");
+//		}
+//	else
+//		printf("Mode Set OK!!!\r\n");
+//	
+//		One_measurement3(mode);
+//	vl53l0x_info();
+//	vl53l0x_info2();
+//	vl53l0x_info3();
 	
 //	while(1)
 //	{
@@ -476,72 +496,72 @@ int main(void)
 	
 	
   
-	Motor_EnableDriver(true);
+//	Motor_EnableDriver(true);
 
-  move_ahead(90,0,1200,150);
-	move_ahead(90,1,600,110);
-	move_ahead(90,0,1200,50);
-	
-  //move_ahead(90,1,600,210);
-	//move_ahead(90,0,1200,220);
-	
-  PushStack(directionVec,90); 
-  PushStack(directionVec,90);
-  PushStack(directionVec,90);
-	//PushStack(directionVec,90);
-  //PushStack(directionVec,90);
-	
-	PushStack(changedirectionVec,0); 
-	PushStack(changedirectionVec,1); 
-	PushStack(changedirectionVec,0); 
-	//PushStack(changedirectionVec,1);
-	//PushStack(changedirectionVec,0);
-	
-	PushStack(speed,1200); 
-	PushStack(speed,600); 
-	PushStack(speed,1200);
-	//PushStack(speed,600); 
-	//PushStack(speed,1200);
-	
-	PushStack(distanceVec,150); 
-	PushStack(distanceVec,110); 
-	PushStack(distanceVec,50);
-	//PushStack(distanceVec,210); 
-	//PushStack(distanceVec,220); 
-	
-	go_right(180,600);
-  
- for(;t<3;t++)
-  { 
-		printf("33");
-		move_ahead1(GetTopElement(directionVec),GetTopElement(changedirectionVec),GetTopElement(speed),GetTopElement(distanceVec));
-	  
-		printf("%d \r\n",GetTopElement(directionVec));
-		printf("%d \r\n",GetTopElement(changedirectionVec));
-		printf("%d \r\n",GetTopElement(speed));
-		printf("%d \r\n",GetTopElement(distanceVec));
-		
-		PopStack(directionVec);
-		PopStack(changedirectionVec);
-		PopStack(speed);
-		PopStack(distanceVec);
-	}
+//  move_ahead(90,0,1200,150);
+//	move_ahead(90,1,600,110);
+//	move_ahead(90,0,1200,50);
+//	
+//  //move_ahead(90,1,600,210);
+//	//move_ahead(90,0,1200,220);
+//	
+//  PushStack(directionVec,90); 
+//  PushStack(directionVec,90);
+//  PushStack(directionVec,90);
+//	//PushStack(directionVec,90);
+//  //PushStack(directionVec,90);
+//	
+//	PushStack(changedirectionVec,0); 
+//	PushStack(changedirectionVec,1); 
+//	PushStack(changedirectionVec,0); 
+//	//PushStack(changedirectionVec,1);
+//	//PushStack(changedirectionVec,0);
+//	
+//	PushStack(speed,1200); 
+//	PushStack(speed,600); 
+//	PushStack(speed,1200);
+//	//PushStack(speed,600); 
+//	//PushStack(speed,1200);
+//	
+//	PushStack(distanceVec,150); 
+//	PushStack(distanceVec,110); 
+//	PushStack(distanceVec,50);
+//	//PushStack(distanceVec,210); 
+//	//PushStack(distanceVec,220); 
+//	
+//	go_right(180,600);
+//  
+// for(;t<3;t++)
+//  { 
+//		printf("33");
+//		move_ahead1(GetTopElement(directionVec),GetTopElement(changedirectionVec),GetTopElement(speed),GetTopElement(distanceVec));
+//	  
+//		printf("%d \r\n",GetTopElement(directionVec));
+//		printf("%d \r\n",GetTopElement(changedirectionVec));
+//		printf("%d \r\n",GetTopElement(speed));
+//		printf("%d \r\n",GetTopElement(distanceVec));
+//		
+//		PopStack(directionVec);
+//		PopStack(changedirectionVec);
+//		PopStack(speed);
+//		PopStack(distanceVec);
+//	}
+// 
+//  
+//	
+//	DestoryStack(directionVec);
+//	DestoryStack(changedirectionVec);
+//	DestoryStack(speed);
+//	DestoryStack(distanceVec);
+//	
+//	//flash测试
+//	STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)TEXT_Buffer,SIZE);
+//	Led_On(false);
+//	STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)datatemp,SIZE);
+//	printf("%s",datatemp);
  
-  
-	
-	DestoryStack(directionVec);
-	DestoryStack(changedirectionVec);
-	DestoryStack(speed);
-	DestoryStack(distanceVec);
-	
-	//flash测试
-	STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)TEXT_Buffer,SIZE);
-	Led_On(false);
-	STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)datatemp,SIZE);
-	printf("%s",datatemp);
- 
+
+
+
+
 }
-
-
-
-
